@@ -62,17 +62,17 @@ class SheetSearch:
 
 # Przyklad uzycia
 
-
-ss = SheetSearch("sheet.xlsx")
-pr = ss.get_proper_rooms("zima-s", 109)
-brr = ss.get_blocking_rows_for_rooms("zima-s", pr)
-br = ss.get_blocking_rows("zima-s", 109)
-print("Zajete terminy:")
-for item in br:
-    print(item)
-print('\n')
-print("Zajetosc sal:")
-for key, value in brr.items():
-    print(key)
-    for v in value:
-        print(v)
+if __name__ == '__main__':
+    ss = SheetSearch("sheet.xlsx")
+    br = ss.get_blocking_rows("zima-s", 109)
+    pr = ss.get_proper_rooms("zima-s", 109)
+    brr = ss.get_blocking_rows_for_rooms("zima-s", pr)
+    print("Zajete terminy:")
+    for item in br:
+        print(item)
+    print('\n')
+    print("Zajetosc sal:")
+    for key, value in brr.items():
+        print(key)
+        for v in value:
+            print(v)
