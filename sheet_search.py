@@ -19,9 +19,10 @@ class SheetSearch:
     def __map_rooms(self, ws):
         gen = self.__map_data(ws)
         for row in gen:
-            yield {"nazwa": ((row["bud"] if row["bud"] is not None else "") + " " + (
-                row["sala"] if row["sala"] is not None else "")).strip(),
-                   "typ": row["typ"] if row["typ"] is not None else ""}
+            if row["bud"] == "D17" or row["bud"] == "D8":
+                yield {"nazwa": ((row["bud"] if row["bud"] is not None else "") + " " + (
+                    row["nr"] if row["nr"] is not None else "")).strip(),
+                       "typ": row["typ"] if row["typ"] is not None else ""}
 
     def get_blocking_rows(self, ws, row_no):
         """Metoda, ktora zwraca wszystkie terminy, w ktorych prowadzacy lub dany rocznik jest zajety"""
@@ -49,13 +50,19 @@ class SheetSearch:
             result[i].append((j, k, l))
         return result
 
+    def get_row(self, ws, row_no):
+        magic_row = list(filter(lambda x: x["numer"] == row_no, list(self.rdd_dict[ws])))[0]
+        return magic_row
+
     def __init__(self, path):
         wb = load_workbook(filename=path, read_only=True)
         self.rdd_dict = {
-            "zima-s": [x for x in self.__map_data(wb["zima-s"])],
-            "lato-s": [x for x in self.__map_data(wb["lato-s"])],
-            "zima-n": [x for x in self.__map_data(wb["zima-n"])],
-            "lato-n": [x for x in self.__map_data(wb["lato-n"])],
+            "zima_s": [x for x in self.__map_data(wb["zima_s"])],
+            "lato_s": [x for x in self.__map_data(wb["lato_s"])],
+            "zima_n": [x for x in self.__map_data(wb["zima_n"])],
+            "lato_n": [x for x in self.__map_data(wb["lato_n"])],
+            "zima_inne": [x for x in self.__map_data(wb["zima_inne"])],
+            "lato_inne": [x for x in self.__map_data(wb["lato_inne"])],
             "sale": [x for x in self.__map_rooms(wb["sale"])]
         }
 
@@ -63,16 +70,23 @@ class SheetSearch:
 # Przyklad uzycia
 
 if __name__ == '__main__':
-    ss = SheetSearch("sheet.xlsx")
-    br = ss.get_blocking_rows("zima-s", 109)
-    pr = ss.get_proper_rooms("zima-s", 109)
-    brr = ss.get_blocking_rows_for_rooms("zima-s", pr)
+    ss = SheetSearch("sheet3.xlsx")
+    br = ss.get_blocking_rows("zima_s", 10)
+    pr = ss.get_proper_rooms("zima_s", 10)
+    brr = ss.get_blocking_rows_for_rooms("zima_inne", pr)
+    brr2 = ss.get_blocking_rows_for_rooms("zima_s", pr)
+    print(ss.get_row("zima_s",10))
     print("Zajete terminy:")
     for item in br:
         print(item)
     print('\n')
     print("Zajetosc sal:")
     for key, value in brr.items():
+        for key2, value2 in brr2.items():
+            if key == key2:
+                value += value2
+    for key, value in brr.items():
         print(key)
         for v in value:
             print(v)
+
