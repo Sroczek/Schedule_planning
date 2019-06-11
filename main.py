@@ -21,6 +21,8 @@ class_duration = 90
 
 def parse_query(query):
     argv = query.split(" ")
+    if argv[0] not in ['zima-s', 'zima-n', 'lato-s', 'lato-n']:
+        raise ValueError("Pierwszy argument powinien być nazwą zakładki\n[zima-s | zima-n | lato-s | lato-n]")
     return argv[0], int(argv[1])
 
 
@@ -72,8 +74,35 @@ ss = SheetSearch("sheet.xlsx")
 
 query = input(">>")
 while query != "q":
-    for el in execute(ss, query):
-        print(el)
+
+    try:
+        res = execute(ss, query)
+    except ValueError as ex:
+        print(ex.args[0])
+    else:
+        for el in res :
+            print(el)
     query = input(">>")
 
 
+'''pytania do Garka:
+1.
+czy możemy założyć, że 
+niestacjonarne => Sb | Nd
+stacjonarne => Pn | Wt | Sr | Cz | Pt
+
+2.
+w jaki sposób ma być sformatowane wyjście
+
+3.
+Jakie godziny -> ciagłe czy dyskretne? 
+Może opcja uruchomienia programu...? 
+
+4.
+Cay skrypt do jednokrotnego uruchomienia czy tryb interaktywny? 
+
+5.
+Może opcja do reloadowania? 
+
+
+'''
