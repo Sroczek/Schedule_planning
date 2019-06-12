@@ -3,15 +3,19 @@ from sheet_search import SheetSearch, itod, cm
 
 
 print("Schedule Planning V1.0\nAplikacja ułatwiająca przenoszenie zajęć\n")
+
 sheet_name = input("Podaj ścieżkę do arkusza:\n>>")
 if not sheet_name:
     sheet_name = "sheet.xlsx"
+
 try:
     ss = SheetSearch(sheet_name)
 except (InvalidFileException,FileNotFoundError):
     print("Ścieżka do pliku niepoprawna")
     exit(0)
+
 print("Arkusz został załadowany. Podaj wiersz w formacie: <nazwa_zakladki> <nr_wiersza>")
+
 query = input(">>")
 while query != "q":
 

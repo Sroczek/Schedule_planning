@@ -38,7 +38,7 @@ def itod(i: int):
     return datetime.time(hour=i // 60, minute=i % 60).strftime("%H:%M")
 
 
-def blocking_row_to_interval(br):
+def to_interval(br):
     if br[0] is None or br[1] is None:
         return []
     if br[2] is None:
@@ -69,11 +69,11 @@ class SheetSearch:
                     row[cm["nr"]] if row[cm["nr"]] is not None else "")).strip(),
                        "typ": row[cm["typ"]] if row[cm["typ"]] is not None else ""}
 
-    def get_blocking_rows(self, ws, row_no):
+    def get_people_occupation(self, ws, row_no):
         """Metoda, ktora zwraca wszystkie terminy, w ktorych prowadzacy lub dany rocznik jest zajety"""
         magic_row = list(filter(lambda x: x["numer"] == row_no, list(self.rdd_dict[ws])))[0]
-        return list(map(lambda x: blocking_row_to_interval((x[cm["dzien"]], x[cm["godz"]], x[cm["koniec"]])),
-                    filter(lambda x: x[cm["osoba"]] == magic_row[cm["osoba"]] or (x[cm["studia"]] == magic_row[cm["studia"]]
+        return list(map(lambda x: to_interval((x[cm["dzien"]], x[cm["godz"]], x[cm["koniec"]])),
+                        filter(lambda x: x[cm["osoba"]] == magic_row[cm["osoba"]] or (x[cm["studia"]] == magic_row[cm["studia"]]
                                                                           and x[cm["sem"]] ==magic_row[cm["sem"]]), self.rdd_dict[ws])))
 
     def get_proper_rooms(self, ws, row_no):
@@ -82,7 +82,7 @@ class SheetSearch:
         return list(
             set(map(lambda x: x["nazwa"], filter(lambda x: x[cm["typ"]] == magic_row[cm["typ"]], self.rdd_dict[cm["sale"]]))))
 
-    def get_blocking_rows_for_rooms(self, ws, room_list):
+    def get_rooms_occupation(self, ws, room_list):
         """Metoda, ktora zwraca slownik przypisujacy kazdej sali trojki: dzien,godzina,koniec,
          w ktorych odbywaja sie zajecia"""
         help = list(set(map(lambda x: (x[cm["sala"]], x[cm["dzien"]], x[cm["godz"]], x[cm["koniec"]]),
@@ -91,7 +91,7 @@ class SheetSearch:
         for x in room_list:
             result[x] = []
         for i, j, k, l in help:
-            result[i].append(blocking_row_to_interval((j, k, l)))
+            result[i].append(to_interval((j, k, l)))
         return result
 
     def get_row(self, ws, row_no):
@@ -109,29 +109,27 @@ class SheetSearch:
         elif ws[-1] == 'n':
             days = ('Sb', 'Nd')
 
-        br = self.get_blocking_rows(ws, row_no)
+        people_occupation = self.get_people_occupation(ws, row_no)
 
         days_unreserved_hours = {day: I.closed(dtoi(begin_classes_time), dtoi(end_classes_time)) for day in days}
 
-        for interval in br:
+        for interval in people_occupation:
             if interval:
                 days_unreserved_hours[interval[0]] = days_unreserved_hours[interval[0]] - interval[1]
 
-        pr = self.get_proper_rooms(ws, row_no)
-        brr = self.get_blocking_rows_for_rooms(ws, pr)
-        #brr2 = self.get_blocking_rows_for_rooms(ws[:-1] + "inne", pr)
-        brr2 = self.get_blocking_rows_for_rooms(cm['zima_inne'], pr) if ws == cm['zima_n'] or ws == cm['zima_s'] \
-            else self.get_blocking_rows_for_rooms(cm['lato_inne'], pr)
-        for key, value in brr.items():
-            for key2, value2 in brr2.items():
+        proper_rooms = self.get_proper_rooms(ws, row_no)
+        rooms_occupation = self.get_rooms_occupation(ws, proper_rooms)
+        other_rooms_occupation = self.get_rooms_occupation(cm['zima_inne'], proper_rooms) if ws == cm['zima_n'] or ws == cm['zima_s'] \
+            else self.get_rooms_occupation(cm['lato_inne'], proper_rooms)
+        for key, value in rooms_occupation.items():
+            for key2, value2 in other_rooms_occupation.items():
                 if key == key2:
                     value += value2
         result = []
 
-        for room, intervals_when_blocked in brr.items():
+        for room, intervals_when_blocked in rooms_occupation.items():
 
-            days_unreserved_room_hours = {day: I.closed(dtoi(begin_classes_time), dtoi(end_classes_time)) for day in
-                                          days}
+            days_unreserved_room_hours = {day: I.closed(dtoi(begin_classes_time), dtoi(end_classes_time)) for day in days}
 
             for interval in intervals_when_blocked:
                 if interval and interval[0] in days:
