@@ -10,7 +10,7 @@ if not sheet_name:
 
 try:
     ss = SheetSearch(sheet_name)
-except (InvalidFileException,FileNotFoundError):
+except Exception:
     print("Ścieżka do pliku niepoprawna")
     exit(0)
 
@@ -37,7 +37,7 @@ while query != "q":
                 print("Wiersz o podanym numerze nie istnieje")
             else:
                 for x in res:
-                    print("{} {}    {} - {}   {}".format(x[0], x[1], itod(x[2].lower), itod(x[2].upper), x[2].upper - x[2].lower))
+                    print("{}\t{} {} - {}\t{}".format(x[0], x[1], itod(x[2].lower), itod(x[2].upper), x[2].upper - x[2].lower))
     else:
         print("Obslugiwane komendy: find")
     query = input(">>")

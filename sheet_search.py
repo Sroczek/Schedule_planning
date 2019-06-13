@@ -20,7 +20,7 @@ cm = {
     'sem': 'sem',  # Nr semestru
     'sala': 'sala',
     'przedmiot': 'przedmiot',  # Nazwa przedmiotu w zeszytach zajec
-    'zima_s': 'zima-s',  # Zeszyt zawierajacy zajecia zimowe stacjonarne
+    'zima_s': 'zima_s',  # Zeszyt zawierajacy zajecia zimowe stacjonarne
     'zima_n': 'zima_n',  # Zeszyt zawierajacy zajecia zimowe niestacjonarne
     'lato_s': 'lato_s',  # Zeszyt zawierajacy zajecia letnie stacjonarne
     'lato_n': 'lato_n',  # Zeszyt zawierajacy zajecia letnie niestacjonarne
@@ -102,7 +102,7 @@ class SheetSearch:
         row = self.get_row(ws, row_no)
         class_duration = dtoi(row[cm["koniec"]]) - dtoi(row[cm["godz"]]) if row[cm["koniec"]] is not None else 90
 
-        print("Wyszukiwanie: {}, {}, {}, {}".format(row[cm["przedmiot"]], row[cm["osoba"]], row[cm["sala"]], row[cm["godz"]]))
+        print("Wyszukiwanie: {}, {}, {}, {} {}".format(row[cm["przedmiot"]], row[cm["osoba"]], row[cm["sala"]],row[cm["dzien"]], row[cm["godz"]].strftime("%H:%M")))
 
         if ws[-1] == 's':
             days = ('Pn', 'Wt', 'Sr', 'Cz', 'Pt')
